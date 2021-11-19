@@ -290,23 +290,36 @@ public final class Main {
   public static class MyPipeline implements VisionPipeline {
     public int val;
 
+    // Network Table variables 
+    NetworkTableInstance nt;
+    NetworkTable table;
 
-
-
-    //NetworkTableInstance nt;
-    //NetworkTable table;
-
+    // image source used by the Streaming Server
     CvSource source1;
+
     public MyPipeline(CvSource source1){  
       this.source1 = source1;
 
-      //nt = NetworkTableInstance.getDefault();
-      //table = nt.getTable("Retroreflective Tape Target");
+      // Get the default instance of Netowrk Tables
+      // and a pointer to the "Retroreflective Tape Target"
+      // entry in that table. This entry is typically used for
+      // side to side aiming. Additional entries could be used 
+      // for other parameters such as vertical/distance/angle 
+      // values. 
+      nt = NetworkTableInstance.getDefault();
+      table = nt.getTable("Retroreflective Tape Target");
     }
 
+    // This is the function for vision processing
+    // Processed images are returned by putting them in 
+    // source1. 
+    // Targetting information should be returned via 
+    // network tables using nt and table. 
     @Override
     public void process(Mat mat) {
       val += 1;
+
+      // Draw some lines. 
       Point pt1 = new Point(mat.width() / 2 , mat.height());
       Point pt2 = new Point(mat.width() / 2, 0);//original line
       Imgproc.line(mat, pt1, pt2, new Scalar(0,0,255),15);
@@ -319,6 +332,8 @@ public final class Main {
        pt3 = new Point(mat.width()*5/8 , 0);//vertical line right
        pt4 = new Point(mat.width()*5/8, mat.height());
       Imgproc.line(mat, pt3, pt4, new Scalar(0,255,0),6);
+
+      // send this image back through the Streaming Server
       source1.putFrame(mat);
     }
   }
@@ -357,38 +372,48 @@ public final class Main {
     }
 
 
+    // Custom code to return processed image from Pipeline
+    // The Pipeline class has a modified constructor that
+    // takes the following CvSource so it can send frames
+    // back through the following MjpegServer
     MjpegServer myStream;
     CvSource source1;
 
+    source1 = new CvSource("myImage", VideoMode.PixelFormat.kMJPEG,640,480,30);
     myStream = new MjpegServer("processedVideo", 1184);
     myStream.setCompression(75);
     myStream.setDefaultCompression(75);
     myStream.setResolution(320, 240);
-    source1 = new CvSource("myImage", VideoMode.PixelFormat.kMJPEG,640,480,30);
     myStream.setSource(source1);
 
+    // if no cameras are defined cameras.get(0) will fail
+    // if we have 1 or more cameras start the VisionThread
+    // (might be "cameras.size()>0")
     if (cameras.size() >= 1) {
       VisionThread visionThread = new VisionThread(cameras.get(0),
               new MyPipeline(source1), pipeline -> {
         // do something with pipeline results
       });
 
+    visionThread.start();
 
 
-
+    // this code is not used due to the code above...
     // // start image processing on camera 0 if present
     // if (cameras.size() >= 1) {
     //   VisionThread visionThread = new VisionThread(cameras.get(0),
     //           new MyPipeline(), pipeline -> {
     //     // do something with pipeline results
     //   });
+
+    // this code woud be used with a saved/generated grip pipeline
       /* something like this for GRIP:
       VisionThread visionThread = new VisionThread(cameras.get(0),
               new GripPipeline(), pipeline -> {
         ...
       });
        */
-      visionThread.start();
+      //visionThread.start();
     }
 
     // loop forever
