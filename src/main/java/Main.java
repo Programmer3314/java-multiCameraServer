@@ -26,6 +26,7 @@ import edu.wpi.cscore.VideoSource;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.vision.VisionPipeline;
 import edu.wpi.first.vision.VisionThread;
 
@@ -292,7 +293,7 @@ public final class Main {
 
     // Network Table variables 
     NetworkTableInstance nt;
-    NetworkTable table;
+    NetworkTable table; 
 
     // image source used by the Streaming Server
     CvSource source1;
