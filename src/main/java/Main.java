@@ -371,7 +371,6 @@ public final class Main {
       startSwitchedCamera(config);
     }
 
-
     // Custom code to return processed image from Pipeline
     // The Pipeline class has a modified constructor that
     // takes the following CvSource so it can send frames
@@ -395,18 +394,18 @@ public final class Main {
         // do something with pipeline results
       });
 
-    visionThread.start();
+      visionThread.start();
 
 
-    // this code is not used due to the code above...
-    // // start image processing on camera 0 if present
-    // if (cameras.size() >= 1) {
-    //   VisionThread visionThread = new VisionThread(cameras.get(0),
-    //           new MyPipeline(), pipeline -> {
-    //     // do something with pipeline results
-    //   });
+      // this code is not used due to the code above...
+      // // start image processing on camera 0 if present
+      // if (cameras.size() >= 1) {
+      //   VisionThread visionThread = new VisionThread(cameras.get(0),
+      //           new MyPipeline(), pipeline -> {
+      //     // do something with pipeline results
+      //   });
 
-    // this code woud be used with a saved/generated grip pipeline
+      // this code woud be used with a saved/generated grip pipeline
       /* something like this for GRIP:
       VisionThread visionThread = new VisionThread(cameras.get(0),
               new GripPipeline(), pipeline -> {
