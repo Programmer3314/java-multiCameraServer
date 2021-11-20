@@ -26,26 +26,9 @@ public final class Main extends MainBase {
 
     standardInit(args);
 
-    // Custom code to return processed image from Pipeline
-    // The Pipeline class has a modified constructor that
-    // takes the following CvSource so it can send frames
-    // back through the following MjpegServer
-    MjpegServer myStream;
-    CvSource source1;
-
-    source1 = new CvSource("myImage", VideoMode.PixelFormat.kMJPEG,640,480,30);
-    myStream = new MjpegServer("processedVideo", 1184);
-    myStream.setCompression(75);
-    myStream.setDefaultCompression(75);
-    myStream.setResolution(320, 240);
-    myStream.setSource(source1);
-
-    // if no cameras are defined cameras.get(0) will fail
-    // if we have 1 or more cameras start the VisionThread
-    // (might be "cameras.size()>0")
-    if (cameras.size() >= 1) {
+    if (cameras.size() > 0) {
       VisionThread visionThread = new VisionThread(cameras.get(0),
-              new MyPipeline(source1), pipeline -> {
+              new TargetingPipeline(), pipeline -> {
         // do something with pipeline results
       });
 

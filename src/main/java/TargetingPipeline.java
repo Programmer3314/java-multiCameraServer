@@ -4,22 +4,36 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import edu.wpi.cscore.CvSource;
+import edu.wpi.cscore.MjpegServer;
+import edu.wpi.cscore.VideoMode;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.vision.VisionPipeline;
 
-public class MyPipeline implements VisionPipeline {
+public class TargetingPipeline implements VisionPipeline {
     public int val;
 
     // Network Table variables 
     NetworkTableInstance nt;
     NetworkTable table; 
 
-    // image source used by the Streaming Server
-    CvSource source1;
+    // Custom code to return processed image from Pipeline
+    // The Pipeline class has a modified constructor that
+    // takes the following CvSource so it can send frames
+    // back through the following MjpegServer
+    MjpegServer returnStream;
+    CvSource returnStreamSource;
 
-    public MyPipeline(CvSource source1){  
-      this.source1 = source1;
+    public TargetingPipeline(){
+      
+      // setup stream to return images  
+      returnStreamSource = new CvSource("processedVideoSource", 
+        VideoMode.PixelFormat.kMJPEG,320,240,30);
+      returnStream = new MjpegServer("processedVideo", 1184);
+      returnStream.setCompression(75);
+      returnStream.setDefaultCompression(75);
+      returnStream.setResolution(320, 240);
+      returnStream.setSource(returnStreamSource);
 
       /* Setup Network Table variables
         Get the default instance of Netowrk Tables
@@ -31,6 +45,7 @@ public class MyPipeline implements VisionPipeline {
         */
       nt = NetworkTableInstance.getDefault();
       table = nt.getTable("Retroreflective Tape Target");
+
     }
 
     /* main processing code
@@ -59,7 +74,7 @@ public class MyPipeline implements VisionPipeline {
       Imgproc.line(mat, pt3, pt4, new Scalar(0,255,0),6);
 
       // send this image back through the Streaming Server
-      source1.putFrame(mat);
+      returnStreamSource.putFrame(mat);
     }
   }
 
